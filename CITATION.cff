@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use or adapt this project, please cite it as below."
+title: "Budget Bloom"
+type: software
+authors:
+  - family-names: Kumar
+    given-names: Brajesh
+version: "0.1.0"
+repository-code: "https://github.com/Brajesh31/Budget-Bloom"
+url: "https://github.com/Brajesh31/Budget-Bloom"
+license: MIT
+keywords:
+  - budgeting
+  - expense tracking
+  - Next.js
+  - PostgreSQL
