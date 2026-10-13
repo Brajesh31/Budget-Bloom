@@ -1,225 +1,88 @@
-# Budget Bloom - Expense Tracker
+# Budget Bloom
 
-A modern, full-stack expense tracking application built with Next.js that helps users manage their finances by tracking expenses, creating budgets, and gaining insights into spending habits.
+Budget Bloom is an expense and budget tracking application prototype. The Next.js app is in **expense/**; the repository root contains a placeholder npm manifest and the project documentation. The app combines a Next.js App Router interface, Clerk sign-in UI, Neon PostgreSQL connectivity, and Drizzle queries.
 
-## 🚀 Features
+## Security status — read before using
 
-- **User Authentication**: Secure sign-in/sign-up with Clerk
-- **Budget Management**: Create, edit, and delete budgets with custom icons
-- **Expense Tracking**: Add, view, and delete expenses for each budget
-- **Visual Analytics**: Interactive charts and graphs using Recharts
-- **Responsive Design**: Mobile-first design with Tailwind CSS
-- **Real-time Updates**: Live data synchronization
-- **Dark/Light Mode**: Theme switching support
+**Do not deploy this repository with real financial or personal data in its current state.** Database access is performed in browser-side components through **NEXT_PUBLIC_DATABASE_URL**. Next.js bundles values with the **NEXT_PUBLIC_** prefix into JavaScript delivered to the browser, so a database connection string containing credentials is exposed to visitors. Several read and write operations also lack server-side ownership checks, and the Clerk middleware does not explicitly protect routes. Client-side filtering by the displayed user's email is not an authorization boundary.
 
-## 🛠️ Technologies Used
+Use disposable development data only until database operations are moved to a trusted server, credentials are server-only, and every operation authenticates the user and verifies ownership. If a privileged connection string has been used in a deployed build, rotate it. See [Security](SECURITY.md) and [Deployment](docs/deployment.md).
 
-### Frontend
-- **Next.js 15** - React framework for production
-- **React 18** - JavaScript library for building user interfaces
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS 4** - Utility-first CSS framework
-- **Shadcn/ui** - Modern UI component library
-- **Lucide React** - Beautiful & consistent icon library
-- **Recharts** - Composable charting library for React
+## What is implemented
 
-### Backend & Database
-- **Neon Database** - Serverless PostgreSQL database
-- **Drizzle ORM** - TypeScript ORM for SQL databases
-- **Drizzle Kit** - Database migration toolkit
+The nested app includes a public landing page, Clerk sign-in and sign-up pages, a dashboard overview, budget listing and creation/editing UI, expense listing and add/delete UI, charts, and an about page. It uses:
 
-### Authentication
-- **Clerk** - Complete authentication and user management
+- Next.js 15 and React 18 with the App Router.
+- Clerk for sign-in UI and user state.
+- Neon serverless PostgreSQL and Drizzle ORM.
+- Tailwind CSS 4, Radix UI components, Lucide icons, Recharts, and Sonner notifications.
 
-### UI/UX Libraries
-- **Radix UI** - Low-level UI primitives
-- **Class Variance Authority** - CSS-in-JS variant API
-- **Tailwind Merge** - Utility for merging Tailwind CSS classes
-- **Sonner** - Toast notification library
-- **Emoji Picker React** - Emoji picker component
-- **Moment.js** - Date manipulation library
+The repository does not currently provide a verified production-ready authorization layer, a tested migration workflow, or evidence of real-time synchronization. The checked-in migration and Drizzle schema are out of sync, and the Drizzle config points to a TypeScript schema file that is not present.
 
-## 📋 Prerequisites
+## Repository layout
 
-Before running this application, make sure you have:
+- **expense/** — the actual Next.js project and its npm scripts.
+- **expense/app/** — landing page, Clerk auth pages, dashboard routes, and UI components.
+- **expense/utils/schema.js** — Drizzle table definitions for budgets and expenses.
+- **expense/utils/dbConfig.jsx** — Neon and Drizzle client configuration currently imported by client components.
+- **expense/drizzle/** — an initial migration and metadata snapshot that do not yet represent the complete current schema.
+- **docs/** — architecture, installation, development, deployment, API, database, troubleshooting, and FAQ guides.
 
-- Node.js (version 18 or higher)
-- npm or yarn package manager
-- A Neon Database account
-- A Clerk account for authentication
+The root **package.json** is empty. Run npm commands from **expense/**, not from the repository root.
 
-## 🚀 Getting Started
+## Setup
 
-### 1. Clone the Repository
+Requirements: Node.js 18.18 or newer, npm, a Clerk development application, and a disposable Neon development database.
 
-```bash
-git clone <repository-url>
-cd expense
-```
+1. Copy the example environment file into the app directory: **Copy-Item .env.example expense/.env** in PowerShell, or **cp .env.example expense/.env** in a POSIX shell.
+2. Edit **expense/.env** with development-only Clerk and database values. See [Installation](docs/installation.md).
+3. Change into the app directory and install its lockfile-defined dependencies:
 
-### 2. Install Dependencies
+       cd expense
+       npm ci
 
-```bash
-npm install
-# or
-yarn install
-```
+4. Start the development server:
 
-### 3. Environment Variables
+       npm run dev
 
-Create a `.env.local` file in the root directory and add the following variables:
+5. Open **http://localhost:3000**.
 
-```env
-# Database
-NEXT_PUBLIC_DATABASE_URL=your_neon_database_url
+The current **NEXT_PUBLIC_DATABASE_URL** variable is unsafe for a privileged database credential because it is exposed in the browser bundle. Do not add a production credential to it. The setup guide explains this code limitation and the separate **DATABASE_URL** read by the Drizzle CLI.
 
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
-```
+## Routes
 
-### 4. Database Setup
+| Path | Purpose |
+| --- | --- |
+| **/** | Landing page. |
+| **/sign-in** | Clerk sign-in component. |
+| **/sign-up** | Clerk sign-up component. |
+| **/dashboard** | Overview cards, chart, latest expenses, and budgets. |
+| **/dashboard/budgets** | Budget list and creation UI. |
+| **/dashboard/expensesdashboard** | Expense list. |
+| **/dashboard/expenses/[id]** | Budget detail, expense list, add/edit/delete controls. |
+| **/dashboard/about** | About page. |
 
-#### Set up Neon Database:
-1. Go to [Neon Console](https://console.neon.tech/)
-2. Create a new project
-3. Copy the connection string to your `.env.local` file
+Route availability does not imply that access control is correctly enforced.
 
-#### Run Database Migrations:
-```bash
-npm run db:push
-```
+## Documentation
 
-#### (Optional) Open Database Studio:
-```bash
-npm run db:studio
-```
+- [Architecture](docs/architecture.md)
+- [Installation](docs/installation.md)
+- [Development](docs/development.md)
+- [Deployment and security prerequisites](docs/deployment.md)
+- [API and external services](docs/api.md)
+- [Database schema and migrations](docs/database.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [FAQ](docs/faq.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Roadmap](ROADMAP.md)
 
-### 5. Set up Clerk Authentication
+## License and assets
 
-1. Go to [Clerk Dashboard](https://dashboard.clerk.com/)
-2. Create a new application
-3. Copy the publishable key and secret key to your `.env.local` file
-4. Configure sign-in/sign-up pages in Clerk dashboard
+Original project code and documentation are licensed under MIT; see [LICENSE](LICENSE). Bundled images and framework/vendor assets may have separate rights. Their source and license records are incomplete, so verify reuse rights before redistribution.
 
-### 6. Run the Development Server
+## Maintainer
 
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
-
-## 📁 Project Structure
-
-```
-expense/
-├── app/                          # Next.js app directory
-│   ├── (auth)/                   # Authentication pages
-│   │   ├── sign-in/
-│   │   └── sign-up/
-│   ├── (routes)/                 # Protected routes
-│   ├── dashboard/                # Dashboard pages
-│   │   ├── _components/          # Dashboard components
-│   │   ├── budgets/              # Budget management
-│   │   ├── expenses/             # Expense tracking
-│   │   └── about/                # About page
-│   ├── _components/              # Global components
-│   ├── globals.css               # Global styles
-│   ├── layout.tsx                # Root layout
-│   └── page.tsx                  # Home page
-├── @/components/ui/              # Shadcn UI components
-├── components/ui/                # Custom UI components
-├── utils/                        # Utility files
-│   ├── dbConfig.jsx              # Database configuration
-│   └── schema.js                 # Database schema
-├── lib/                          # Library functions
-├── public/                       # Static assets
-└── drizzle/                      # Database migrations
-```
-
-## 🎯 Usage
-
-### Creating a Budget
-1. Navigate to the Budgets page
-2. Click "Create New Budget"
-3. Choose an emoji icon
-4. Enter budget name and amount
-5. Click "Create Budget"
-
-### Adding Expenses
-1. Click on a budget card
-2. Use the "Add Expense" form
-3. Enter expense name and amount
-4. Click "Add New Expense"
-
-### Viewing Analytics
-- Dashboard shows overview cards with total budget, spending, and number of budgets
-- Bar chart displays spending vs budget for each category
-- Latest expenses table shows recent transactions
-
-## 🚀 Deployment
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-### Deploy to Vercel
-
-The easiest way to deploy is using [Vercel](https://vercel.com/):
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy automatically
-
-### Environment Variables for Production
-
-Make sure to add all environment variables in your deployment platform:
-- `NEXT_PUBLIC_DATABASE_URL`
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-- `CLERK_SECRET_KEY`
-
-## 📝 Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:push` - Push database schema changes
-- `npm run db:studio` - Open Drizzle Studio
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Developer
-
-**Hariprasath V**
-- Email: officialhari2030@gmail.com
-- Phone: 8925425514
-- GitHub: [Hariprasath2030](https://github.com/Hariprasath2030)
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/) for the amazing React framework
-- [Clerk](https://clerk.com/) for authentication services
-- [Neon](https://neon.tech/) for serverless PostgreSQL
-- [Shadcn/ui](https://ui.shadcn.com/) for beautiful UI components
-- [Tailwind CSS](https://tailwindcss.com/) for styling utilities
-
----
-
-**Budget Bloom** - Take control of your finances! 🌸💰
+Brajesh Kumar — GitHub [@brajesh31](https://github.com/brajesh31).
