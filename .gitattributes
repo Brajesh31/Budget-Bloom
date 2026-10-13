@@ -1,0 +1,21 @@
+# Normalize text sources, documentation, lockfiles, and migrations.
+* text=auto
+*.md text eol=lf
+*.cff text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.sql text eol=lf
+*.css text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Preserve binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
