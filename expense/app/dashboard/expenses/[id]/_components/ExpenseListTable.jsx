@@ -1,83 +1,106 @@
-import { Trash } from 'lucide-react'
-import React from 'react'
-import { db } from '../../../../../utils/dbConfig';
-import { eq } from 'drizzle-orm';
-import { toast } from 'sonner';
-import { Expenses } from '../../../../../utils/schema';
+"use client";
 
-function ExpenseListTable({ expensesList, refreshData }) {
+import React, { useState } from "react";
+import { Trash2 } from "lucide-react";
+import { db } from "../../../../../utils/dbConfig";
+import { eq } from "drizzle-orm";
+import { toast } from "sonner";
+import { Expenses } from "../../../../../utils/schema";
+import { Button } from "../../../../../components/ui/button";
+
+function ExpenseListTable({ expensesList = [], refreshData }) {
+  const [deletingId, setDeletingId] = useState(null);
 
   const deleteExpense = async (expense) => {
-    const confirmDelete = confirm("Are you sure you want to delete this expense?");
-    if (!confirmDelete) return;
+    if (!window.confirm(`Delete the expense "${expense.name}"?`)) return;
 
-    const result = await db.delete(Expenses)
-      .where(eq(Expenses.id, expense.id))
-      .returning();
+    setDeletingId(expense.id);
+    try {
+      const result = await db
+        .delete(Expenses)
+        .where(eq(Expenses.id, expense.id))
+        .returning({ deletedId: Expenses.id });
 
-    if (result.length > 0) {
-      toast.success("Expense deleted successfully");
-      refreshData();
-    } else {
-      toast.error("Something went wrong");
+      if (result.length > 0) {
+        toast.success("Expense deleted.");
+        await refreshData?.();
+      } else {
+        toast.error("This expense could not be found.");
+      }
+    } catch (error) {
+      console.error("Unable to delete expense:", error);
+      toast.error("We couldn't delete this expense. Please try again.");
+    } finally {
+      setDeletingId(null);
     }
-  }
+  };
 
   return (
-    <div className="mt-3 w-full">
-      <h1 className="font-bold text-3xl">Latest Expenses</h1>
-      <br></br>
-      {/* Table Header */}
-      <div className="hidden md:grid grid-cols-4 bg-slate-400 p-3 gap-3 rounded-t-md">
-        <h2 className="font-semibold">Name</h2>
-        <h2 className="font-semibold">Amount</h2>
-        <h2 className="font-semibold">Date</h2>
-        <h2 className="font-semibold">Actions</h2>
+    <section className="mt-6 w-full" aria-labelledby="latest-expenses-heading">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 id="latest-expenses-heading" className="text-2xl font-bold sm:text-3xl">
+          Latest Expenses
+        </h2>
+        <span className="text-sm text-slate-500">
+          {expensesList.length} {expensesList.length === 1 ? "record" : "records"}
+        </span>
       </div>
 
-      {/* Table Body */}
-      <div className="space-y-3">
-        {expensesList.map((expense) => (
-          <div
-            key={expense.id}
-            className="grid grid-cols-1 md:grid-cols-4 bg-slate-100 p-4 gap-2 rounded-md shadow-sm"
-          >
-            {/* Mobile View Labels */}
-            <div className="md:hidden">
-              <p className="text-sm text-gray-500">Name</p>
-              <h2 className="font-bold">{expense.name}</h2>
-            </div>
-            <div className="md:hidden">
-              <p className="text-sm text-gray-500">Amount</p>
-              <h2 className="font-bold">{expense.amount}</h2>
-            </div>
-            <div className="md:hidden">
-              <p className="text-sm text-gray-500">Date</p>
-              <h2 className="font-bold">{expense.createdAt}</h2>
-            </div>
-            <div className="md:hidden">
-              <p className="text-sm text-gray-500">Actions</p>
-              <Trash
-                className="text-red-600 cursor-pointer"
-                onClick={() => deleteExpense(expense)}
-              />
-            </div>
-
-            {/* Desktop View */}
-            <h2 className="hidden md:block font-bold">{expense.name}</h2>
-            <h2 className="hidden md:block font-bold">{expense.amount}</h2>
-            <h2 className="hidden md:block font-bold">{expense.createdAt}</h2>
-            <div className="hidden md:flex justify-start">
-              <Trash
-                className="text-red-600 cursor-pointer"
-                onClick={() => deleteExpense(expense)}
-              />
-            </div>
+      {expensesList.length === 0 ? (
+        <div className="rounded-xl border border-dashed bg-slate-50 px-5 py-10 text-center">
+          <p className="text-2xl" aria-hidden="true">🧾</p>
+          <h3 className="mt-2 font-semibold text-slate-900">No expenses yet</h3>
+          <p className="mt-1 text-sm text-slate-600">Expenses you add to your budgets will appear here.</p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border">
+          <div className="hidden grid-cols-4 gap-3 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid">
+            <span>Expense</span>
+            <span>Amount</span>
+            <span>Date</span>
+            <span className="text-right">Actions</span>
           </div>
-        ))}
-      </div>
-    </div>
-  )
+          <ul className="divide-y">
+            {expensesList.map((expense) => (
+              <li
+                key={expense.id}
+                className="grid grid-cols-1 gap-3 px-4 py-4 transition-colors hover:bg-slate-50 md:grid-cols-4 md:items-center"
+              >
+                <div className="min-w-0">
+                  <span className="text-xs text-slate-500 md:hidden">Expense</span>
+                  <p className="break-words font-semibold text-slate-900">{expense.name}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-slate-500 md:hidden">Amount</span>
+                  <p className="font-medium text-slate-800">
+                    ${Number(expense.amount || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-xs text-slate-500 md:hidden">Date</span>
+                  <p className="text-sm text-slate-600">{expense.createdAt || "Date unavailable"}</p>
+                </div>
+                <div className="flex justify-start md:justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    aria-label={`Delete expense ${expense.name}`}
+                    disabled={deletingId === expense.id}
+                    onClick={() => deleteExpense(expense)}
+                  >
+                    <Trash2 size={17} aria-hidden="true" />
+                    <span className="ml-2 md:hidden">{deletingId === expense.id ? "Deleting..." : "Delete"}</span>
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
 }
 
 export default ExpenseListTable;
