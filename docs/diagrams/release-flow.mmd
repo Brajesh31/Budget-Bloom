@@ -1,0 +1,12 @@
+flowchart TD
+  A[Issue and acceptance criteria] --> B[Threat and privacy review]
+  B --> C[Implementation]
+  C --> D[Unit and integration tests]
+  D --> E[Authorization isolation tests]
+  E --> F[Build and lint]
+  F --> G{All required checks pass?}
+  G -- No --> C
+  G -- Yes --> H[Documentation and migration review]
+  H --> I[Backup and rollback plan]
+  I --> J[Release]
+  J --> K[Monitor and record feedback]
