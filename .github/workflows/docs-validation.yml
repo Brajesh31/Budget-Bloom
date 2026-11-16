@@ -1,0 +1,26 @@
+name: Documentation Validation
+
+on:
+  pull_request:
+    paths:
+      - "**.md"
+      - "docs/**"
+      - "scripts/validate_docs.py"
+  push:
+    branches: [main]
+    paths:
+      - "**.md"
+      - "docs/**"
+      - "scripts/validate_docs.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Markdown links and non-empty files
+        run: python scripts/validate_docs.py
