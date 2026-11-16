@@ -1,0 +1,13 @@
+flowchart LR
+  Visitor[👤 Visitor] --> Web[Budget Bloom web app]
+  Web --> Clerk[Clerk identity service]
+  Web --> Neon[(Neon PostgreSQL)]
+  Maintainer[Maintainer] --> Repo[GitHub repository]
+  Repo --> CI[GitHub Actions]
+  CI --> Build[Next.js build]
+  Build --> Host[Deployment host]
+
+  classDef risk fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+  class Neon risk
+  %% Current implementation connects to Neon from client-side components using a public-prefixed URL.
+  %% Replace this path with server-only access before production use.
