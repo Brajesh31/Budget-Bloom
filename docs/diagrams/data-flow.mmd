@@ -1,0 +1,15 @@
+flowchart TD
+  A[User opens dashboard] --> B[Client component]
+  B --> C[Clerk client user state]
+  B --> D[Drizzle query]
+  D --> E[(Neon PostgreSQL)]
+  E --> F[Browser renders budget and expense data]
+
+  subgraph Required future secure flow
+    G[Browser action] --> H[Server Action or Route Handler]
+    H --> I[Verify Clerk session]
+    I --> J[Validate and authorize owner]
+    J --> K[Server-only database client]
+    K --> L[(Neon PostgreSQL)]
+    L --> M[Return minimal response]
+  end
