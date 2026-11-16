@@ -1,37 +1,44 @@
 "use client";
-import React from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGrid, PiggyBank, ReceiptText, ShieldCheck } from "lucide-react";
 
-function SideNav() {
-  const menuList = [
-    { name: "Dashboard", icon: LayoutGrid, href: "/dashboard" },
-    { name: "Budget", icon: PiggyBank, href: "/dashboard/budgets" },
-    { name: "Expenses", icon: ReceiptText, href: "/dashboard/expenses" },
-    { name: "Upgrade", icon: ShieldCheck, href: "/dashboard/upgrade" },
-  ];
+const menuItems = [
+  { name: "Dashboard", icon: LayoutGrid, href: "/dashboard" },
+  { name: "Budgets", icon: PiggyBank, href: "/dashboard/budgets" },
+  { name: "Expenses", icon: ReceiptText, href: "/dashboard/expensesdashboard" },
+  { name: "About", icon: ShieldCheck, href: "/dashboard/about" },
+];
 
-  const path = usePathname();
-  console.log("Current Path:", path); // Debugging
+export default function SideNav() {
+  const pathname = usePathname();
 
   return (
-    <div className="h-screen p-5 border shadow-sm w-64 bg-white">
-      
-      <ul className="mt-6 px-8 space-y-6 text-lg">
-        {menuList.map((link) => (
-          <li key={link.name}>
-            <Link href={link.href} className="block">
-              <div className={`flex items-center space-x-4 p-3 rounded-md transition hover:text-blue-400 hover:bg-blue-100 ${path === link.href ? "text-primary bg-blue-100" : ""}`}>
-                <link.icon size={24} />
-                <span>{link.name}</span>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <aside className="h-full w-64 border-r bg-white p-5 shadow-sm">
+      <nav aria-label="Dashboard navigation">
+        <ul className="mt-6 space-y-2">
+          {menuItems.map(({ name, icon: Icon, href }) => {
+            const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(`${href}/`));
+            return (
+              <li key={href}>
+                <Link
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${
+                    active
+                      ? "bg-blue-50 font-semibold text-blue-700"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                  }`}
+                >
+                  <Icon size={21} aria-hidden="true" />
+                  <span>{name}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </aside>
   );
 }
-
-export default SideNav;
