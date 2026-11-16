@@ -1,39 +1,56 @@
-import React from 'react'
-import Link from 'next/link'
-export default function BudgetItem({ budget }) {
+import React from "react";
+import Link from "next/link";
 
-  const calculateProgressPerc = () => {
-    const perc = (budget.totalSpend / budget.amount) * 100;
-    return Math.min(perc, 100).toFixed(2);
-  }
+export default function BudgetItem({ budget }) {
+  const amount = Number(budget?.amount) || 0;
+  const spent = Number(budget?.totalSpend) || 0;
+  const itemCount = Number(budget?.totalItem) || 0;
+  const progress = amount > 0 ? Math.min((spent / amount) * 100, 100) : 0;
+  const remaining = Math.max(amount - spent, 0);
+
   return (
-    <Link href={'/dashboard/expenses/' + budget?.id} >
-      <div className='p-5 border rounded-lg hover:shadow-md cursor-pointer h-[170px]'>
-        <div className='flex gap-2 items-center justify-between'>
-          <div className='flex gap-2 items-center'>
-            <h2 className='text-2xl p-3 px-4 bg-slate-100 rounded-full'>{budget?.icon}</h2>
-            <div>
-              <h2 className='font-bold text-black-100'>{budget.name}</h2>
-              <h2 className='text-sm text-black-100'>{budget.totalItem} Item</h2>
+    <Link
+      href={`/dashboard/expenses/${budget?.id}`}
+      aria-label={`Open ${budget?.name || "budget"} budget details`}
+      className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+    >
+      <article className="h-full min-h-[170px] rounded-lg border p-5 transition-shadow hover:shadow-md">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span aria-hidden="true" className="rounded-full bg-slate-100 px-4 py-3 text-2xl">
+              {budget?.icon || "💰"}
+            </span>
+            <div className="min-w-0">
+              <h2 className="truncate font-bold text-slate-900">{budget?.name || "Untitled budget"}</h2>
+              <p className="text-sm text-slate-500">{itemCount} {itemCount === 1 ? "expense" : "expenses"}</p>
             </div>
           </div>
-          <h2 className='font-bold  text-primary text-lg'>${budget.amount}</h2>
+          <p className="shrink-0 text-lg font-bold text-primary">
+            ${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}
+          </p>
         </div>
-        <div className='mt-5'>
-          <div className='flex items-center justify-between mb-5'>
-            <h2 className='text-xs text-slate-400'>${budget.totalSpend ? budget.totalSpend : 0} Spend</h2>
-            <h2 className='text-xs text-slate-400'>${budget.amount - budget.totalSpend}Remaining</h2>
+
+        <div className="mt-5">
+          <div className="mb-3 flex items-center justify-between gap-3 text-xs text-slate-500">
+            <span>${spent.toLocaleString("en-US", { maximumFractionDigits: 2 })} spent</span>
+            <span>${remaining.toLocaleString("en-US", { maximumFractionDigits: 2 })} remaining</span>
           </div>
-          <div className='w-full bg-slate-300 h-2 rounded-full'>
-            <div className='bg-black h-2 rounded-full'
-              style={{
-                width: `${calculateProgressPerc()}%`
-              }}
-            >
-            </div>
+          <div
+            className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+            role="progressbar"
+            aria-label={`Spending progress for ${budget?.name || "budget"}`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress)}
+          >
+            <div
+              className="h-full rounded-full bg-blue-700 transition-all"
+              style={{ width: `${progress}%` }}
+            />
           </div>
+          <p className="mt-2 text-right text-xs text-slate-500">{progress.toFixed(0)}% used</p>
         </div>
-      </div>
+      </article>
     </Link>
-  )
+  );
 }
